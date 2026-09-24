@@ -1,20 +1,26 @@
 import express from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
+
 import {
   createDonorProfile,
   getMyDonorProfile,
-  updateMyDonorProfile
+  updateMyDonorProfile,
+  searchDonors
 } from "../controllers/donorController.js";
+
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-//Create a new donor profile
+// Create a donor profile
 router.post("/", authMiddleware, createDonorProfile);
 
-// Get the logged-in user's donor profile
+// Search for compatible available donors
+router.get("/search", authMiddleware, searchDonors);
+
+// Get my donor profile
 router.get("/me", authMiddleware, getMyDonorProfile);
 
-// Update the logged-in user's donor profile
+// Update my donor profile
 router.put("/me", authMiddleware, updateMyDonorProfile);
 
 export default router;

@@ -1,4 +1,5 @@
 import Donor from "../models/Donor.js";
+import bloodCompatibility from "../utils/bloodCompatibility.js";
 
 export const createDonorProfile = async (req, res) => {
   try {
@@ -126,6 +127,73 @@ export const updateMyDonorProfile = async (req, res) => {
 
     res.status(500).json({
       message: "Failed to update donor profile"
+    });
+  }
+};
+
+// Search for available donors who can match the requested blood group
+export const searchDonors = async (req, res) => {
+  try {
+    // Get search filters from the URL
+    const { bloodGroup, city, area } = req.query;
+
+    // Blood group is required for compatibility matching
+    if (!bloodGroup) {
+      return res.status(400).json({
+        message: "Please provide a blood group"
+      });
+    }
+
+    // Check whether the blood group is supported
+    const compatibleGroups = bloodCompatibility[bloodGroup];
+
+    if (!compatibleGroups) {
+      return res.status(400).json({
+        message: "Invalid blood group"
+      });
+    }
+
+    // Build the database search conditions
+    const searchConditions = {
+      // Only return donors who are currently available
+      availability: true,
+
+      // Find donors whose blood group can match the requested group
+      bloodGroup: {
+        $in: compatibleGroups
+      }
+    };
+
+    // Add city filter if the user provided one
+    if (city) {
+      searchConditions["location.city"] = city;
+    }
+
+    // Add area filter if the user provided one
+    if (area) {
+      searchConditions["location.area"] = area;
+    }
+
+    // Search the donor collection
+    const donors = await Donor.find(searchConditions)
+      // Get basic information about the donor's user account
+      .populate("user", "name email phone role")
+      // Show newest donor profiles first
+      .sort({ createdAt: -1 });
+
+    // Return the matching donors
+    res.status(200).json({
+      message: "Donors retrieved successfully",
+      requestedBloodGroup: bloodGroup,
+      compatibleBloodGroups: compatibleGroups,
+      count: donors.length,
+      donors
+    });
+  } catch (error) {
+    console.error("Search donors error:", error);
+
+    res.status(500).json({
+      message: "Failed to search donors"
     });
   }
 };
