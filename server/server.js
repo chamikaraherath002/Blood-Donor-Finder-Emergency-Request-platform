@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import authMiddleware from "./middleware/authMiddleware.js";
 import donorRoutes from "./routes/donorRoutes.js";
+import bloodRequestRoutes from "./routes/bloodRequestRoutes.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/donors", donorRoutes);
+app.use("/api/blood-requests", bloodRequestRoutes);   // Blood request routes
 
 app.get("/api/auth/me", authMiddleware, (req, res) => {
   res.json({
@@ -27,7 +29,7 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Blood Donor Finder API is running",
+    message: "Blood Donor Finder API is running"
   });
 });
 
