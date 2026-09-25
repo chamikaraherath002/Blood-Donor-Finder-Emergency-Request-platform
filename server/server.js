@@ -7,6 +7,8 @@ import authRoutes from "./routes/authRoutes.js";
 import authMiddleware from "./middleware/authMiddleware.js";
 import donorRoutes from "./routes/donorRoutes.js";
 import bloodRequestRoutes from "./routes/bloodRequestRoutes.js";
+import donationRequestRoutes from "./routes/donationRequestRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/donors", donorRoutes);
 app.use("/api/blood-requests", bloodRequestRoutes);   // Blood request routes
+app.use("/api/donation-requests", donationRequestRoutes); // Donation request routes
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/api/auth/me", authMiddleware, (req, res) => {
   res.json({
