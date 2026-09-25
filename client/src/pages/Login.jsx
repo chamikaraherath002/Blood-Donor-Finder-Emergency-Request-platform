@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Login() {
+function Login({ onLogin }) {
   // Store the values entered in the form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +26,7 @@ function Login() {
         }),
       });
 
-      const data = await response.json();       //waiting the backend response
+      const data = await response.json(); //waiting the backend response
 
       if (!response.ok) {
         setMessage(data.message || "Login failed");
@@ -36,9 +36,10 @@ function Login() {
       // Save the JWT token in the browser
       localStorage.setItem("token", data.token);
 
-      setMessage("Login successful!");
-
-      console.log("Logged in user:", data.user);
+      // Tell App.jsx that login was successful
+      if (onLogin) {
+        onLogin();
+      }
     } catch (error) {
       console.error("Login error:", error);
       setMessage("Cannot connect to the server");
@@ -74,9 +75,7 @@ function Login() {
           />
         </div>
 
-        <button type="submit">
-          Login
-        </button>
+        <button type="submit">Login</button>
       </form>
 
       {/* Show success or error message */}
