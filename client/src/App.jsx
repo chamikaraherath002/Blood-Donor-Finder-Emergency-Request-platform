@@ -1,57 +1,57 @@
-import { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import DonorProfile from "./pages/DonorProfile.jsx";
+import FindDonors from "./pages/FindDonors.jsx";
+import CreateBloodRequest from "./pages/CreateBloodRequest.jsx";
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" replace />;
+}
 
 function App() {
-  // Decide which page to show
-  const [page, setPage] = useState(
-    localStorage.getItem("token") ? "dashboard" : "login"
-  );
-
-  const handleLogin = () => {
-    // Go to dashboard after successful login
-    setPage("dashboard");
-  };
-
-  const handleLogout = () => {
-    // Remove the JWT token
-    localStorage.removeItem("token");
-
-    // Go back to login
-    setPage("login");
-  };
-
   return (
-    <div>
-      {page === "login" && (
-        <>
-          <Login onLogin={handleLogin} />
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-          <hr />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/donor-profile"
+        element={
+          <ProtectedRoute>
+            <DonorProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/find-donors"
+        element={
+          <ProtectedRoute>
+            <FindDonors />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/create-blood-request"
+        element={
+          <ProtectedRoute>
+            <CreateBloodRequest />
+          </ProtectedRoute>
+        }
+      />
 
-          <button onClick={() => setPage("register")}>
-            Go to Register
-          </button>
-        </>
-      )}
-
-      {page === "register" && (
-        <>
-          <Register />
-
-          <hr />
-
-          <button onClick={() => setPage("login")}>
-            Go to Login
-          </button>
-        </>
-      )}
-
-      {page === "dashboard" && (
-        <Dashboard onLogout={handleLogout} />
-      )}
-    </div>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 

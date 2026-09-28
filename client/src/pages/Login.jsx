@@ -1,20 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Login({ onLogin }) {
-  // Store the values entered in the form
+function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Store messages from the backend
   const [message, setMessage] = useState("");
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
     setMessage("");
 
     try {
-      // Send login details to the backend
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
@@ -26,20 +24,17 @@ function Login({ onLogin }) {
         }),
       });
 
-      const data = await response.json(); //waiting the backend response
+      const data = await response.json();
 
       if (!response.ok) {
         setMessage(data.message || "Login failed");
         return;
       }
 
-      // Save the JWT token in the browser
       localStorage.setItem("token", data.token);
 
-      // Tell App.jsx that login was successful
-      if (onLogin) {
-        onLogin();
-      }
+      // was: onLogin() — now navigate to dashboard directly
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       setMessage("Cannot connect to the server");
@@ -49,7 +44,6 @@ function Login({ onLogin }) {
   return (
     <div>
       <h1>Blood Donor Finder</h1>
-
       <h2>Login</h2>
 
       <form onSubmit={handleLogin}>
@@ -78,7 +72,6 @@ function Login({ onLogin }) {
         <button type="submit">Login</button>
       </form>
 
-      {/* Show success or error message */}
       {message && <p>{message}</p>}
     </div>
   );

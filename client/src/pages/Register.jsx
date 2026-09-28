@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
+
   // Store the values entered in the form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,7 +20,6 @@ function Register() {
     setMessage("");
 
     try {
-      // Send registration data to the backend
       const response = await fetch(
         "http://localhost:5000/api/auth/register",
         {
@@ -37,16 +39,13 @@ function Register() {
 
       const data = await response.json();
 
-      // Check if registration failed
       if (!response.ok) {
         setMessage(data.message || "Registration failed");
         return;
       }
 
-      // Show successful registration message
       setMessage("Registration successful!");
 
-      // Clear the form
       setName("");
       setEmail("");
       setPassword("");
@@ -121,13 +120,13 @@ function Register() {
           </select>
         </div>
 
-        <button type="submit">
-          Register
-        </button>
+        <button type="submit">Register</button>
       </form>
 
-      {/* Show success or error message */}
       {message && <p>{message}</p>}
+
+      <hr />
+      <button onClick={() => navigate("/login")}>Go to Login</button>
     </div>
   );
 }
