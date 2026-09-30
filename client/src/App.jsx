@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import DonorProfile from "./pages/DonorProfile.jsx";
 import FindDonors from "./pages/FindDonors.jsx";
 import CreateBloodRequest from "./pages/CreateBloodRequest.jsx";
+import MyBloodRequests from "./pages/MyBloodRequests.jsx";
+import ReceivedDonationRequests from "./pages/ReceivedDonationRequests.jsx";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -51,6 +53,24 @@ function App() {
       />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      <Route
+        path="/my-blood-requests"
+        element={
+          <ProtectedRoute>
+            <MyBloodRequests />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/donation-requests/received"
+        element={
+          <ProtectedRoute>
+            <ReceivedDonationRequests />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

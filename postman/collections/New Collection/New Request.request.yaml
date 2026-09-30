@@ -1,0 +1,15 @@
+$kind: http-request
+url: GET http://localhost:5000/api/blood-requests
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "email": "chami123@gmail.com",
+      "password": "Chami123"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_10q9}}"
+order: 1790703041929

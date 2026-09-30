@@ -28,12 +28,17 @@ function Dashboard() {
       <button onClick={() => navigate("/create-blood-request")}>
         Create Blood Request
       </button>
-      <button>My Blood Requests</button>
+
+      <button onClick={() => navigate("/my-blood-requests")}>
+        My Blood Requests
+      </button>
 
       <hr />
 
       <h3>Donation Requests</h3>
-      <button>Received Requests</button>
+      <button onClick={() => navigate("/donation-requests/received")}>
+        Received Requests
+      </button>
       <button>Sent Requests</button>
 
       <hr />

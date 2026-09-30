@@ -72,7 +72,10 @@ function Login() {
         <button type="submit">Login</button>
       </form>
 
-      {message && <p>{message}</p>}
+            {message && <p>{message}</p>}
+
+      <hr />
+      <button onClick={() => navigate("/register")}>Go to Register</button>
     </div>
   );
 }
