@@ -7,6 +7,8 @@ import FindDonors from "./pages/FindDonors.jsx";
 import CreateBloodRequest from "./pages/CreateBloodRequest.jsx";
 import MyBloodRequests from "./pages/MyBloodRequests.jsx";
 import ReceivedDonationRequests from "./pages/ReceivedDonationRequests.jsx";
+import SentDonationRequests from "./pages/SentDonationRequests.jsx";
+import Notifications from "./pages/Notifications.jsx";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -68,6 +70,24 @@ function App() {
         element={
           <ProtectedRoute>
             <ReceivedDonationRequests />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/sent-donation-requests"
+        element={
+          <ProtectedRoute>
+            <SentDonationRequests />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Notifications />
           </ProtectedRoute>
         }
       />

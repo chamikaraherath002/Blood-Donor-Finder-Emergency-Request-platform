@@ -39,12 +39,16 @@ function Dashboard() {
       <button onClick={() => navigate("/donation-requests/received")}>
         Received Requests
       </button>
-      <button>Sent Requests</button>
+      <button onClick={() => navigate("/sent-donation-requests")}>
+        Sent Requests
+      </button>
 
       <hr />
 
       <h3>Notifications</h3>
-      <button>View Notifications</button>
+      <button onClick={() => navigate("/notifications")}>
+        View Notifications
+      </button>
 
       <hr />
 
