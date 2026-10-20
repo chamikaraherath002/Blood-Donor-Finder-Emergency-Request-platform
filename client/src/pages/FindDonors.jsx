@@ -117,7 +117,7 @@ function FindDonors() {
         <p>No donors found.</p>
       ) : (
         donors.map((donor) => (
-          <div key={donor._id}>
+          <div className="record-card" key={donor._id}>
             <hr />
 
             <p>

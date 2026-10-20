@@ -56,7 +56,7 @@ function SentDonationRequests() {
         <p>You have not sent any donation requests yet.</p>
       ) : (
         requests.map((req) => (
-          <div key={req._id}>
+          <div className="record-card" key={req._id}>
             <hr />
 
             <p>

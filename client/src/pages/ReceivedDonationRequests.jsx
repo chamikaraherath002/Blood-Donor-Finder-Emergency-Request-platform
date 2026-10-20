@@ -134,14 +134,7 @@ function ReceivedDonationRequests() {
         <p>No donation requests received.</p>
       ) : (
         requests.map((request) => (
-          <div
-            key={request._id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "15px",
-              marginBottom: "15px",
-            }}
-          >
+          <div className="record-card" key={request._id}>
             <h3>Donation Request</h3>
 
             <p>

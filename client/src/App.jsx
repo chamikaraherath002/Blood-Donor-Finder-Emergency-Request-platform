@@ -1,4 +1,12 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  NavLink,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -10,21 +18,127 @@ import ReceivedDonationRequests from "./pages/ReceivedDonationRequests.jsx";
 import SentDonationRequests from "./pages/SentDonationRequests.jsx";
 import Notifications from "./pages/Notifications.jsx";
 
-function ProtectedRoute({ children }) {
+const navigationItems = [
+  { to: "/dashboard", label: "Overview", icon: "⌂", end: true },
+  { to: "/find-donors", label: "Find donors", icon: "⌕" },
+  { to: "/create-blood-request", label: "New blood request", icon: "+" },
+  { to: "/my-blood-requests", label: "My blood requests", icon: "▤" },
+  { to: "/donation-requests/received", label: "Received requests", icon: "↓" },
+  { to: "/sent-donation-requests", label: "Sent requests", icon: "↑" },
+  { to: "/notifications", label: "Notifications", icon: "♧" },
+  { to: "/donor-profile", label: "Donor profile", icon: "○" },
+];
+
+function AppShell({ children, darkMode, onToggleTheme }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentItem = navigationItems.find((item) =>
+    item.end
+      ? location.pathname === item.to
+      : location.pathname.startsWith(item.to),
+  );
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <NavLink className="brand" to="/dashboard">
+          <span className="brand-mark" aria-hidden="true">♥</span>
+          <span className="brand-name">Donor<span>Connect</span></span>
+        </NavLink>
+        <p className="nav-caption">Workspace</p>
+        <nav className="sidebar-nav" aria-label="Main navigation">
+          {navigationItems.map((item) => (
+            <NavLink
+              end={item.end}
+              aria-label={item.label}
+              key={item.to}
+              title={item.label}
+              to={item.to}
+            >
+              <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <button className="sidebar-logout" onClick={handleLogout} type="button">
+            <span className="nav-icon" aria-hidden="true">↪</span>
+            <span className="nav-label">Sign out</span>
+          </button>
+        </div>
+      </aside>
+      <div className="app-main">
+        <header className="topbar">
+          <span className="topbar-label">{currentItem?.label || "Workspace"}</span>
+          <div className="topbar-tools">
+            <button
+              aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              className="theme-toggle"
+              onClick={onToggleTheme}
+              type="button"
+            >
+              <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
+              <span>{darkMode ? "Light mode" : "Dark mode"}</span>
+            </button>
+            <button
+              className="topbar-signout"
+              onClick={handleLogout}
+              type="button"
+            >
+              Sign out
+            </button>
+            <span className="profile-chip" aria-label="Your account">BD</span>
+          </div>
+        </header>
+        <main className="page-content">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+function ProtectedRoute({ children, darkMode, onToggleTheme }) {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? (
+    <AppShell darkMode={darkMode} onToggleTheme={onToggleTheme}>
+      {children}
+    </AppShell>
+  ) : (
+    <Navigate to="/login" replace />
+  );
 }
 
 function App() {
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("theme") === "dark",
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  const toggleTheme = () => setDarkMode((currentMode) => !currentMode);
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/login"
+        element={<Login darkMode={darkMode} onToggleTheme={toggleTheme} />}
+      />
+      <Route
+        path="/register"
+        element={<Register darkMode={darkMode} onToggleTheme={toggleTheme} />}
+      />
 
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <Dashboard />
           </ProtectedRoute>
         }
@@ -32,7 +146,7 @@ function App() {
       <Route
         path="/donor-profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <DonorProfile />
           </ProtectedRoute>
         }
@@ -40,7 +154,7 @@ function App() {
       <Route
         path="/find-donors"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <FindDonors />
           </ProtectedRoute>
         }
@@ -48,7 +162,7 @@ function App() {
       <Route
         path="/create-blood-request"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <CreateBloodRequest />
           </ProtectedRoute>
         }
@@ -59,7 +173,7 @@ function App() {
       <Route
         path="/my-blood-requests"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <MyBloodRequests />
           </ProtectedRoute>
         }
@@ -68,7 +182,7 @@ function App() {
       <Route
         path="/donation-requests/received"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <ReceivedDonationRequests />
           </ProtectedRoute>
         }
@@ -77,7 +191,7 @@ function App() {
       <Route
         path="/sent-donation-requests"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <SentDonationRequests />
           </ProtectedRoute>
         }
@@ -86,7 +200,7 @@ function App() {
       <Route
         path="/notifications"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
             <Notifications />
           </ProtectedRoute>
         }

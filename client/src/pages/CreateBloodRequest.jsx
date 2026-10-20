@@ -181,8 +181,6 @@ function CreateBloodRequest() {
           />
         </div>
 
-        <br />
-
         <button type="submit">Create Blood Request</button>
       </form>
 

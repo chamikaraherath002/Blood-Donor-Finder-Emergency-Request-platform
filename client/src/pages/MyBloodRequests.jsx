@@ -57,7 +57,7 @@ function MyBloodRequests() {
         <p>You have not created any blood requests yet.</p>
       ) : (
         requests.map((request) => (
-          <div key={request._id}>
+          <div className="record-card" key={request._id}>
             <hr />
 
             <p>

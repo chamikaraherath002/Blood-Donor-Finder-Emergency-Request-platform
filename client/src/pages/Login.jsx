@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Login({ darkMode, onToggleTheme }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -42,41 +42,63 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>Blood Donor Finder</h1>
-      <h2>Login</h2>
-
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
+    <main className="auth-page">
+      <aside className="auth-aside">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">♥</span>
+          <span className="brand-name">Donor<span>Connect</span></span>
         </div>
-
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+        <div className="auth-aside-copy">
+          <h1>Small act.<br />Big impact.</h1>
+          <p>Join a community that brings donors and people in need closer together.</p>
         </div>
-
-        <button type="submit">Login</button>
-      </form>
-
-            {message && <p>{message}</p>}
-
-      <hr />
-      <button onClick={() => navigate("/register")}>Go to Register</button>
-    </div>
+        <p className="auth-footnote">Together, we can help save lives.</p>
+      </aside>
+      <section className="auth-form-side">
+        <div className="auth-card">
+          <div className="auth-tools">
+            <button className="theme-toggle" onClick={onToggleTheme} type="button">
+              <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
+              {darkMode ? "Light mode" : "Dark mode"}
+            </button>
+          </div>
+          <h2>Welcome back</h2>
+          <p>Sign in to continue to your account.</p>
+          <form onSubmit={handleLogin}>
+            <div>
+              <label htmlFor="login-email">Email</label>
+              <input
+                id="login-email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </div>
+            <button type="submit">Sign in</button>
+          </form>
+          {message && <p className="auth-message" role="alert">{message}</p>}
+          <p className="auth-switch">
+            New to DonorConnect?{" "}
+            <button onClick={() => navigate("/register")} type="button">
+              Create an account
+            </button>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
 

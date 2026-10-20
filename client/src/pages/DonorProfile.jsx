@@ -214,8 +214,6 @@ function DonorProfile() {
               />
             </div>
 
-            <br />
-
             <button type="submit">Create Donor Profile</button>
           </form>
         </>
@@ -223,31 +221,33 @@ function DonorProfile() {
         <>
           {!isEditing ? (
             <>
-              <p>
-                <strong>Blood Group:</strong> {donor.bloodGroup}
-              </p>
+              <div className="record-card">
+                <p>
+                  <strong>Blood Group:</strong> {donor.bloodGroup}
+                </p>
 
-              <p>
-                <strong>Availability:</strong>{" "}
-                {donor.availability ? "Available" : "Not Available"}
-              </p>
+                <p>
+                  <strong>Availability:</strong>{" "}
+                  {donor.availability ? "Available" : "Not Available"}
+                </p>
 
-              <p>
-                <strong>Area:</strong> {donor.location.area}
-              </p>
+                <p>
+                  <strong>Area:</strong> {donor.location.area}
+                </p>
 
-              <p>
-                <strong>City:</strong> {donor.location.city}
-              </p>
+                <p>
+                  <strong>City:</strong> {donor.location.city}
+                </p>
 
-              <p>
-                <strong>Last Donation:</strong>{" "}
-                {donor.lastDonationDate
-                  ? new Date(donor.lastDonationDate).toLocaleDateString()
-                  : "Not provided"}
-              </p>
+                <p>
+                  <strong>Last Donation:</strong>{" "}
+                  {donor.lastDonationDate
+                    ? new Date(donor.lastDonationDate).toLocaleDateString()
+                    : "Not provided"}
+                </p>
 
-              <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+                <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+              </div>
             </>
           ) : (
             <form onSubmit={handleUpdateProfile}>
@@ -307,8 +307,6 @@ function DonorProfile() {
                   onChange={(event) => setLastDonationDate(event.target.value)}
                 />
               </div>
-
-              <br />
 
               <button type="submit">Save Changes</button>
 
