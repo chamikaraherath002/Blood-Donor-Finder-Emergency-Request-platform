@@ -147,7 +147,7 @@ function CreateBloodRequest() {
           >
             <option value="NORMAL">Normal</option>
             <option value="URGENT">Urgent</option>
-            <option value="EMERGENCY">Emergency</option>
+            
           </select>
         </div>
 

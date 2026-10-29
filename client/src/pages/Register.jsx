@@ -5,11 +5,11 @@ function Register({ darkMode, onToggleTheme }) {
   const navigate = useNavigate();
 
   // Store the values entered in the form
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("SEEKER");
 
   // Store success/error messages
   const [message, setMessage] = useState("");
@@ -28,11 +28,10 @@ function Register({ darkMode, onToggleTheme }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name,
+            name: `${firstName.trim()} ${lastName.trim()}`,
             email,
             password,
             phone,
-            role,
           }),
         }
       );
@@ -46,11 +45,11 @@ function Register({ darkMode, onToggleTheme }) {
 
       setMessage("Registration successful!");
 
-      setName("");
+      setFirstName("");
+      setLastName("");
       setEmail("");
       setPassword("");
       setPhone("");
-      setRole("SEEKER");
     } catch (error) {
       console.error("Registration error:", error);
       setMessage("Cannot connect to the server");
@@ -73,22 +72,38 @@ function Register({ darkMode, onToggleTheme }) {
       <section className="auth-form-side">
         <div className="auth-card">
           <div className="auth-tools">
-            <button className="theme-toggle" onClick={onToggleTheme} type="button">
+            <button
+              aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              className="theme-toggle"
+              onClick={onToggleTheme}
+              title={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              type="button"
+            >
               <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
-              {darkMode ? "Light mode" : "Dark mode"}
             </button>
           </div>
           <h2>Create your account</h2>
           <p>Get started by sharing a few details.</p>
           <form onSubmit={handleRegister}>
             <div>
-              <label htmlFor="register-name">Name</label>
+              <label htmlFor="register-first-name">First name</label>
               <input
-                id="register-name"
+                id="register-first-name"
                 type="text"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
+                placeholder="Enter your first name"
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="register-last-name">Last name</label>
+              <input
+                id="register-last-name"
+                type="text"
+                placeholder="Enter your last name"
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
                 required
               />
             </div>
@@ -124,17 +139,6 @@ function Register({ darkMode, onToggleTheme }) {
                 onChange={(event) => setPhone(event.target.value)}
                 required
               />
-            </div>
-            <div>
-              <label htmlFor="register-role">I want to</label>
-              <select
-                id="register-role"
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-              >
-                <option value="SEEKER">Find a blood donor</option>
-                <option value="DONOR">Donate blood</option>
-              </select>
             </div>
             <button type="submit">Create account</button>
           </form>

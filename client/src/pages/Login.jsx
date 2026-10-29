@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bloodDonationImage from "../assets/blood-donation.png";
+import heartbeatImage from "../assets/heartbeat.png";
 
 function Login({ darkMode, onToggleTheme }) {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ function Login({ darkMode, onToggleTheme }) {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userName", data.user.name);
 
       // was: onLogin() — now navigate to dashboard directly
       navigate("/dashboard");
@@ -44,6 +47,7 @@ function Login({ darkMode, onToggleTheme }) {
   return (
     <main className="auth-page">
       <aside className="auth-aside">
+        <img className="auth-heartbeat" src={heartbeatImage} alt="" />
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">♥</span>
           <span className="brand-name">Donor<span>Connect</span></span>
@@ -57,11 +61,21 @@ function Login({ darkMode, onToggleTheme }) {
       <section className="auth-form-side">
         <div className="auth-card">
           <div className="auth-tools">
-            <button className="theme-toggle" onClick={onToggleTheme} type="button">
+            <button
+              aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              className="theme-toggle"
+              onClick={onToggleTheme}
+              title={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              type="button"
+            >
               <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
-              {darkMode ? "Light mode" : "Dark mode"}
             </button>
           </div>
+          <img
+            className="login-illustration"
+            src={bloodDonationImage}
+            alt=""
+          />
           <h2>Welcome back</h2>
           <p>Sign in to continue to your account.</p>
           <form onSubmit={handleLogin}>

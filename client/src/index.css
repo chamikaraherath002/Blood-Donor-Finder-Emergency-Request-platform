@@ -7,9 +7,10 @@
 
   --background: #f7f8fb;
   --surface: #ffffff;
+  --sidebar-background: #f0c0c5;
   --surface-alt: #f1f3f7;
   --heading: #1d2029;
-  --muted: #747b8b;
+  --muted: #000000;
   --border: #e5e8ee;
   --primary: #c52f49;
   --primary-hover: #a9233a;
@@ -26,6 +27,7 @@
   color-scheme: dark;
   --background: #12141a;
   --surface: #1b1e27;
+  --sidebar-background: #1b1e27;
   --surface-alt: #252936;
   --heading: #f4f5f8;
   --muted: #a2a8b7;

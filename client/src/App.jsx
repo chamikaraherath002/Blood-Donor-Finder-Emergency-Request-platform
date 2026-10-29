@@ -32,6 +32,11 @@ const navigationItems = [
 function AppShell({ children, darkMode, onToggleTheme }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const userName = localStorage.getItem("userName") || "";
+  const nameParts = userName.trim().split(/\s+/).filter(Boolean);
+  const initials = nameParts.length > 1
+    ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase()
+    : nameParts[0]?.[0]?.toUpperCase() || "?";
   const currentItem = navigationItems.find((item) =>
     item.end
       ? location.pathname === item.to
@@ -40,6 +45,7 @@ function AppShell({ children, darkMode, onToggleTheme }) {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userName");
     navigate("/login");
   };
 
@@ -83,7 +89,6 @@ function AppShell({ children, darkMode, onToggleTheme }) {
               type="button"
             >
               <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
-              <span>{darkMode ? "Light mode" : "Dark mode"}</span>
             </button>
             <button
               className="topbar-signout"
@@ -92,7 +97,14 @@ function AppShell({ children, darkMode, onToggleTheme }) {
             >
               Sign out
             </button>
-            <span className="profile-chip" aria-label="Your account">BD</span>
+            <NavLink
+              aria-label="View donor profile"
+              className="profile-chip"
+              title="Donor profile"
+              to="/donor-profile"
+            >
+              {initials}
+            </NavLink>
           </div>
         </header>
         <main className="page-content">{children}</main>

@@ -80,6 +80,34 @@ export const getMyBloodRequests = async (req, res) => {
   }
 };
 
+export const getLatestUrgentBloodRequests = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const bloodRequests = await BloodRequest.find({
+      requester: { $ne: req.user.userId },
+      urgency: { $in: ["URGENT", "EMERGENCY"] },
+      status: { $in: ["PENDING", "ACCEPTED"] },
+      requiredDate: { $gte: today },
+    })
+      .select("bloodGroup units hospital location urgency requiredDate createdAt")
+      .sort({ createdAt: -1 })
+      .limit(3);
+
+    res.status(200).json({
+      message: "Latest urgent blood requests retrieved successfully",
+      bloodRequests,
+    });
+  } catch (error) {
+    console.error("Get latest urgent blood requests error:", error);
+
+    res.status(500).json({
+      message: "Failed to retrieve latest urgent blood requests",
+    });
+  }
+};
+
 // Update one of the logged-in user's blood requests
 export const updateBloodRequest = async (req, res) => {
   try {
