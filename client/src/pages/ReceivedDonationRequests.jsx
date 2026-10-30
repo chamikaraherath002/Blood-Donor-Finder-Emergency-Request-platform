@@ -5,7 +5,10 @@ function ReceivedDonationRequests() {
   const navigate = useNavigate();
 
   const [requests, setRequests] = useState([]);
+  const [bloodRequests, setBloodRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingBloodRequests, setLoadingBloodRequests] = useState(true);
+  const [bloodRequestsMessage, setBloodRequestsMessage] = useState("");
 
   // Get the logged-in user's token
   const token = localStorage.getItem("token");
@@ -45,6 +48,40 @@ function ReceivedDonationRequests() {
     fetchReceivedRequests();
   }
 }, [token]);
+
+  useEffect(() => {
+    const fetchCommunityBloodRequests = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/blood-requests/community",
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          },
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          setBloodRequestsMessage(
+            data.message || "Failed to load community blood requests",
+          );
+          return;
+        }
+
+        setBloodRequests(data.bloodRequests || []);
+      } catch (error) {
+        console.error("Failed to load community blood requests:", error);
+        setBloodRequestsMessage("Cannot connect to the server");
+      } finally {
+        setLoadingBloodRequests(false);
+      }
+    };
+
+    if (token) {
+      fetchCommunityBloodRequests();
+    }
+  }, [token]);
 
   // Accept a donation request
   const handleAccept = async (requestId) => {
@@ -122,13 +159,60 @@ function ReceivedDonationRequests() {
 
   return (
     <div>
-      <h1>Received Donation Requests</h1>
+      <h1>Received requests</h1>
 
       <button onClick={() => navigate("/dashboard")}>
         Back to Dashboard
       </button>
 
       <hr />
+
+      <h2>Blood requests from the community</h2>
+      {bloodRequestsMessage && <p role="alert">{bloodRequestsMessage}</p>}
+      {loadingBloodRequests ? (
+        <p>Loading community blood requests...</p>
+      ) : bloodRequests.length === 0 ? (
+        <p>No active blood requests from other users.</p>
+      ) : (
+        bloodRequests.map((request) => (
+          <div className="record-card" key={request._id}>
+            <h3>{request.bloodGroup} blood needed</h3>
+            <p>
+              <strong>Requester:</strong>{" "}
+              {request.requester?.name || "Community member"}
+            </p>
+            <p>
+              <strong>Units:</strong> {request.units}
+            </p>
+            <p>
+              <strong>Hospital:</strong> {request.hospital}
+            </p>
+            <p>
+              <strong>Location:</strong> {request.location.area},{" "}
+              {request.location.city}
+            </p>
+            <p>
+              <strong>Urgency:</strong> {request.urgency}
+            </p>
+            <p>
+              <strong>Required Date:</strong>{" "}
+              {new Date(request.requiredDate).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Contact:</strong> {request.contactPhone}
+            </p>
+            {request.message && (
+              <p>
+                <strong>Message:</strong> {request.message}
+              </p>
+            )}
+          </div>
+        ))
+      )}
+
+      <hr />
+
+      <h2>Donation requests sent to you</h2>
 
       {requests.length === 0 ? (
         <p>No donation requests received.</p>

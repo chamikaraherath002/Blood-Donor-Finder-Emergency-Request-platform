@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  getUnreadNotificationCount,
   getMyNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead
@@ -9,6 +10,9 @@ import {
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+// Get logged-in user's unread notification count
+router.get("/unread-count", authMiddleware, getUnreadNotificationCount);
 
 // Get logged-in user's notifications
 router.get("/", authMiddleware, getMyNotifications);

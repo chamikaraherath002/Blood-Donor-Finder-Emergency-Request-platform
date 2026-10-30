@@ -140,6 +140,18 @@ function DonorProfile() {
     }
   };
 
+  const handleCancelEdit = () => {
+    setBloodGroup(donor.bloodGroup);
+    setAvailability(donor.availability);
+    setArea(donor.location.area);
+    setCity(donor.location.city);
+    setLastDonationDate(
+      donor.lastDonationDate ? donor.lastDonationDate.split("T")[0] : "",
+    );
+    setIsEditing(false);
+    setMessage("");
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -214,7 +226,7 @@ function DonorProfile() {
               />
             </div>
 
-            <button type="submit">Create Donor Profile</button>
+            <button type="submit">Save Profile</button>
           </form>
         </>
       ) : (
@@ -310,7 +322,7 @@ function DonorProfile() {
 
               <button type="submit">Save Changes</button>
 
-              <button type="button" onClick={() => setIsEditing(false)}>
+              <button type="button" onClick={handleCancelEdit}>
                 Cancel
               </button>
             </form>

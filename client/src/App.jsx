@@ -32,6 +32,8 @@ const navigationItems = [
 function AppShell({ children, darkMode, onToggleTheme }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const token = localStorage.getItem("token");
   const userName = localStorage.getItem("userName") || "";
   const nameParts = userName.trim().split(/\s+/).filter(Boolean);
   const initials = nameParts.length > 1
@@ -42,6 +44,61 @@ function AppShell({ children, darkMode, onToggleTheme }) {
       ? location.pathname === item.to
       : location.pathname.startsWith(item.to),
   );
+
+  useEffect(() => {
+    // Keep the unread badge fresh without requiring a page reload.
+    let active = true;
+
+    const fetchUnreadNotificationCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/notifications/unread-count",
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          },
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Failed to retrieve unread notification count",
+          );
+        }
+
+        if (active) {
+          setUnreadNotificationCount(data.unreadCount);
+        }
+      } catch (error) {
+        console.error("Unread notification count error:", error);
+      }
+    };
+
+    fetchUnreadNotificationCount();
+    const intervalId = window.setInterval(fetchUnreadNotificationCount, 30000);
+    // Refresh promptly when the user returns to the tab or reads notifications.
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchUnreadNotificationCount();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener(
+      "notifications-updated",
+      fetchUnreadNotificationCount,
+    );
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener(
+        "notifications-updated",
+        fetchUnreadNotificationCount,
+      );
+    };
+  }, [location.pathname, token]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -90,6 +147,44 @@ function AppShell({ children, darkMode, onToggleTheme }) {
             >
               <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
             </button>
+            <NavLink
+              aria-label={
+                unreadNotificationCount
+                  ? `Notifications, ${unreadNotificationCount} unread`
+                  : "Notifications"
+              }
+              className="topbar-notifications"
+              title="Notifications"
+              to="/notifications"
+            >
+              <svg
+                aria-hidden="true"
+                className="notification-bell-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
+                />
+                <path
+                  d="M10 21h4"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="1.8"
+                />
+              </svg>
+              {unreadNotificationCount > 0 && (
+                <span aria-hidden="true" className="notification-count">
+                  {unreadNotificationCount > 99
+                    ? "99+"
+                    : unreadNotificationCount}
+                </span>
+              )}
+            </NavLink>
             <button
               className="topbar-signout"
               onClick={handleLogout}

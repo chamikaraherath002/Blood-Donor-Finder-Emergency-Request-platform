@@ -31,6 +31,7 @@ const notificationSchema = new mongoose.Schema(
         "REQUEST_ACCEPTED",
         "REQUEST_REJECTED",
         "BLOOD_REQUEST",
+        "BLOOD_REQUEST_RESPONSE",
       ],
       required: true,
     },
@@ -52,6 +53,13 @@ const notificationSchema = new mongoose.Schema(
     bloodRequest: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BloodRequest",
+      default: null,
+    },
+
+    // Donor response to a blood request
+    bloodRequestResponse: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BloodRequestResponse",
       default: null,
     },
   },

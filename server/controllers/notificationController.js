@@ -1,5 +1,23 @@
 import Notification from "../models/Notification.js";
 
+// Get the number of unread notifications for the logged-in user
+export const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const unreadCount = await Notification.countDocuments({
+      recipient: req.user.userId,
+      isRead: false,
+    });
+
+    res.status(200).json({ unreadCount });
+  } catch (error) {
+    console.error("Get unread notification count error:", error);
+
+    res.status(500).json({
+      message: "Failed to retrieve unread notification count",
+    });
+  }
+};
+
 // Get all notifications for the logged-in user
 export const getMyNotifications = async (req, res) => {
   try {
@@ -8,6 +26,10 @@ export const getMyNotifications = async (req, res) => {
     })
       .populate("donationRequest")
       .populate("bloodRequest")
+      .populate({
+        path: "bloodRequestResponse",
+        populate: { path: "donor", select: "name phone" },
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({

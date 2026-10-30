@@ -72,6 +72,8 @@ function Notifications() {
             : notification,
         ),
       );
+      // Update the header badge immediately after a notification is read.
+      document.dispatchEvent(new Event("notifications-updated"));
     } catch (error) {
       console.error("Mark notification as read error:", error);
       setActionError("Cannot connect to the server");
@@ -110,6 +112,8 @@ function Notifications() {
           isRead: true,
         })),
       );
+      // Keep the header badge in sync after marking all as read.
+      document.dispatchEvent(new Event("notifications-updated"));
     } catch (error) {
       console.error("Mark all notifications as read error:", error);
       setActionError("Cannot connect to the server");
@@ -180,6 +184,13 @@ function Notifications() {
                     )}
                   </div>
                   <p>{notification.message}</p>
+                  {notification.bloodRequestResponse?.donor && (
+                    <p>
+                      <strong>Donor contact:</strong>{" "}
+                      {notification.bloodRequestResponse.donor.name} ·{" "}
+                      {notification.bloodRequestResponse.donor.phone}
+                    </p>
+                  )}
                   <time dateTime={notification.createdAt}>
                     {new Date(notification.createdAt).toLocaleString()}
                   </time>
