@@ -1,60 +1,71 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const emptyProfile = {
+  bloodGroup: "O+",
+  availability: true,
+  area: "",
+  city: "",
+  lastDonationDate: "",
+};
+
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
 function DonorProfile() {
   const navigate = useNavigate();
-
-  // Store the donor profile
   const [donor, setDonor] = useState(null);
-
+  const [account, setAccount] = useState(null);
+  const [profile, setProfile] = useState(emptyProfile);
   const [isEditing, setIsEditing] = useState(false);
-
-  // Store form values
-  const [bloodGroup, setBloodGroup] = useState("O+");
-  const [availability, setAvailability] = useState(true);
-  const [area, setArea] = useState("");
-  const [city, setCity] = useState("");
-  const [lastDonationDate, setLastDonationDate] = useState("");
-
-  // Store messages
   const [message, setMessage] = useState("");
-
-  // Store loading state
+  const [messageType, setMessageType] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Get the existing donor profile
+  const updateField = (field, value) => {
+    setProfile((current) => ({ ...current, [field]: value }));
+  };
+
+  const populateProfile = (donorData) => {
+    setProfile({
+      bloodGroup: donorData?.bloodGroup || "O+",
+      availability: donorData?.availability ?? true,
+      area: donorData?.location?.area || "",
+      city: donorData?.location?.city || "",
+      lastDonationDate: donorData?.lastDonationDate
+        ? donorData.lastDonationDate.split("T")[0]
+        : "",
+    });
+  };
+
   useEffect(() => {
     const fetchDonorProfile = async () => {
-      const token = localStorage.getItem("token");
-
       try {
         const response = await fetch("http://localhost:5000/api/donors/me", {
-          method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-
         const data = await response.json();
+
+        if (data.user) {
+          setAccount(data.user);
+          populateProfile(data.donor);
+        }
 
         if (response.ok) {
           setDonor(data.donor);
-          setBloodGroup(data.donor.bloodGroup);
-          setAvailability(data.donor.availability);
-          setArea(data.donor.location.area);
-          setCity(data.donor.location.city);
-
-          if (data.donor.lastDonationDate) {
-            setLastDonationDate(data.donor.lastDonationDate.split("T")[0]);
-          }
         } else if (response.status === 404) {
           setDonor(null);
+          setIsEditing(true);
         } else {
           setMessage(data.message || "Failed to load donor profile");
+          setMessageType("error");
         }
       } catch (error) {
         console.error("Donor profile error:", error);
         setMessage("Cannot connect to the server");
+        setMessageType("error");
       } finally {
         setLoading(false);
       }
@@ -63,276 +74,281 @@ function DonorProfile() {
     fetchDonorProfile();
   }, []);
 
-  const handleUpdateProfile = async (event) => {
+  const handleSaveProfile = async (event) => {
     event.preventDefault();
+    setSaving(true);
+    setMessage("");
+    setMessageType("");
 
-    const token = localStorage.getItem("token");
+    const hasDonorProfile = Boolean(donor);
+    const payload = {
+      bloodGroup: profile.bloodGroup,
+      availability: profile.availability,
+      location: {
+        area: profile.area,
+        city: profile.city,
+      },
+      lastDonationDate: profile.lastDonationDate || null,
+    };
 
     try {
-      const response = await fetch("http://localhost:5000/api/donors/me", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          bloodGroup,
-          availability,
-          location: {
-            area,
-            city,
+      const response = await fetch(
+        hasDonorProfile
+          ? "http://localhost:5000/api/donors/me"
+          : "http://localhost:5000/api/donors",
+        {
+          method: hasDonorProfile ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          lastDonationDate: lastDonationDate || null,
-        }),
-      });
-
+          body: JSON.stringify(payload),
+        },
+      );
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Failed to update donor profile");
+        setMessage(data.message || "Failed to save your profile");
+        setMessageType("error");
         return;
       }
 
       setDonor(data.donor);
+      setAccount(data.user || data.donor.user);
+      populateProfile(data.donor);
       setIsEditing(false);
-      setMessage("Donor profile updated successfully!");
+      setMessage(hasDonorProfile ? "Your profile has been updated." : "Your donor profile is ready.");
+      setMessageType("success");
     } catch (error) {
-      console.error("Update donor profile error:", error);
+      console.error("Save donor profile error:", error);
       setMessage("Cannot connect to the server");
-    }
-  };
-
-  const handleCreateProfile = async (event) => {
-    event.preventDefault();
-
-    const token = localStorage.getItem("token");
-
-    try {
-      const response = await fetch("http://localhost:5000/api/donors", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          bloodGroup,
-          availability,
-          location: {
-            area,
-            city,
-          },
-          lastDonationDate: lastDonationDate || null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.message || "Failed to create donor profile");
-        return;
-      }
-
-      setDonor(data.donor);
-      setMessage("Donor profile created successfully!");
-    } catch (error) {
-      console.error("Create donor profile error:", error);
-      setMessage("Cannot connect to the server");
+      setMessageType("error");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleCancelEdit = () => {
-    setBloodGroup(donor.bloodGroup);
-    setAvailability(donor.availability);
-    setArea(donor.location.area);
-    setCity(donor.location.city);
-    setLastDonationDate(
-      donor.lastDonationDate ? donor.lastDonationDate.split("T")[0] : "",
-    );
+    populateProfile(donor);
     setIsEditing(false);
     setMessage("");
+    setMessageType("");
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p className="donor-profile-loading">Loading your profile...</p>;
   }
 
   return (
-    <div>
-      <h1>My Donor Profile</h1>
+    <main className="donor-profile-page">
+      <header className="donor-profile-header">
+        <div>
+          <p className="admin-eyebrow">Your information</p>
+          <h1>My Donor Profile</h1>
+          <p>Keep your contact and donor details up to date.</p>
+        </div>
+      </header>
 
-      {message && <p>{message}</p>}
-
-      {!donor ? (
-        <>
-          <h2>Create Donor Profile</h2>
-
-          <form onSubmit={handleCreateProfile}>
-            <div>
-              <label>Blood Group</label>
-              <select
-                value={bloodGroup}
-                onChange={(event) => setBloodGroup(event.target.value)}
-              >
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </div>
-
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={availability}
-                  onChange={(event) => setAvailability(event.target.checked)}
-                />
-                Available to donate
-              </label>
-            </div>
-
-            <div>
-              <label>Area</label>
-              <input
-                type="text"
-                placeholder="Enter your area"
-                value={area}
-                onChange={(event) => setArea(event.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label>City</label>
-              <input
-                type="text"
-                placeholder="Enter your city"
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label>Last Donation Date</label>
-              <input
-                type="date"
-                value={lastDonationDate}
-                onChange={(event) => setLastDonationDate(event.target.value)}
-              />
-            </div>
-
-            <button type="submit">Save Profile</button>
-          </form>
-        </>
-      ) : (
-        <>
-          {!isEditing ? (
-            <>
-              <div className="record-card">
-                <p>
-                  <strong>Blood Group:</strong> {donor.bloodGroup}
-                </p>
-
-                <p>
-                  <strong>Availability:</strong>{" "}
-                  {donor.availability ? "Available" : "Not Available"}
-                </p>
-
-                <p>
-                  <strong>Area:</strong> {donor.location.area}
-                </p>
-
-                <p>
-                  <strong>City:</strong> {donor.location.city}
-                </p>
-
-                <p>
-                  <strong>Last Donation:</strong>{" "}
-                  {donor.lastDonationDate
-                    ? new Date(donor.lastDonationDate).toLocaleDateString()
-                    : "Not provided"}
-                </p>
-
-                <button onClick={() => setIsEditing(true)}>Edit Profile</button>
-              </div>
-            </>
-          ) : (
-            <form onSubmit={handleUpdateProfile}>
-              <div>
-                <label>Blood Group</label>
-                <select
-                  value={bloodGroup}
-                  onChange={(event) => setBloodGroup(event.target.value)}
-                >
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
-              </div>
-
-              <div>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={availability}
-                    onChange={(event) => setAvailability(event.target.checked)}
-                  />
-                  Available to donate
-                </label>
-              </div>
-
-              <div>
-                <label>Area</label>
-                <input
-                  type="text"
-                  value={area}
-                  onChange={(event) => setArea(event.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label>City</label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label>Last Donation Date</label>
-                <input
-                  type="date"
-                  value={lastDonationDate}
-                  onChange={(event) => setLastDonationDate(event.target.value)}
-                />
-              </div>
-
-              <button type="submit">Save Changes</button>
-
-              <button type="button" onClick={handleCancelEdit}>
-                Cancel
-              </button>
-            </form>
+      <section aria-labelledby="donor-profile-title" className="record-card donor-profile-card">
+        <header className="donor-profile-section-header">
+          <div>
+            <h2 id="donor-profile-title">
+              {donor ? "Profile details" : "Create your donor profile"}
+            </h2>
+            <p>
+              {donor
+                ? "Your account and donation information in one place."
+                : "Add your contact and donation information to join the donor community."}
+            </p>
+          </div>
+          {donor && !isEditing && (
+            <button
+              className="donor-profile-edit-button"
+              onClick={() => {
+                setMessage("");
+                setIsEditing(true);
+              }}
+              type="button"
+            >
+              Edit profile
+            </button>
           )}
-        </>
-      )}
+        </header>
 
-      <hr />
-      <button onClick={() => navigate("/dashboard")}>Back to Dashboard</button>
-    </div>
+        {message && (
+          <p className={`donor-profile-message ${messageType}`} role="status">
+            {message}
+          </p>
+        )}
+
+        {isEditing ? (
+          <form className="donor-profile-form" onSubmit={handleSaveProfile}>
+            <div className="donor-profile-form-section">
+              <h3>Contact details</h3>
+              <dl className="donor-profile-details">
+                <div><dt>Full name</dt><dd>{account?.name || "Not provided"}</dd></div>
+                <div><dt>Email address</dt><dd>{account?.email || "Not provided"}</dd></div>
+                <div><dt>Phone number</dt><dd>{account?.phone || "Not provided"}</dd></div>
+                {account?.createdAt && (
+                  <div>
+                    <dt>Member since</dt>
+                    <dd>{new Date(account.createdAt).toLocaleDateString()}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
+            <div className="donor-profile-form-section">
+              <h3>Donor details</h3>
+              <div className="donor-profile-form-grid">
+                <label>
+                  Blood group
+                  <select
+                    onChange={(event) => updateField("bloodGroup", event.target.value)}
+                    value={profile.bloodGroup}
+                  >
+                    {bloodGroups.map((group) => (
+                      <option key={group} value={group}>{group}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Area
+                  <input
+                    autoComplete="address-level3"
+                    maxLength="100"
+                    onChange={(event) => updateField("area", event.target.value)}
+                    required
+                    value={profile.area}
+                  />
+                </label>
+                <label>
+                  City
+                  <input
+                    autoComplete="address-level2"
+                    maxLength="100"
+                    onChange={(event) => updateField("city", event.target.value)}
+                    required
+                    value={profile.city}
+                  />
+                </label>
+                <label>
+                  Last donation date
+                  <input
+                    max={new Date().toISOString().split("T")[0]}
+                    onChange={(event) =>
+                      updateField("lastDonationDate", event.target.value)
+                    }
+                    type="date"
+                    value={profile.lastDonationDate}
+                  />
+                </label>
+                <fieldset className="donor-availability-control">
+                  <legend>Donation availability</legend>
+                  <div className="donor-availability-options">
+                    {[true, false].map((isAvailable) => (
+                      <button
+                        aria-pressed={profile.availability === isAvailable}
+                        className={[
+                          "donor-availability-option",
+                          profile.availability === isAvailable ? "selected" : "",
+                          isAvailable ? "available-option" : "unavailable-option",
+                        ].filter(Boolean).join(" ")}
+                        key={String(isAvailable)}
+                        onClick={() => updateField("availability", isAvailable)}
+                        type="button"
+                      >
+                        <span className="donor-availability-indicator" aria-hidden="true" />
+                        <span>
+                          <strong>{isAvailable ? "Available" : "Taking a break"}</strong>
+                          <small>
+                            {isAvailable
+                              ? "Show me in donor searches"
+                              : "Hide me from donor searches"}
+                          </small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div className="donor-profile-form-actions">
+              <button disabled={saving} type="submit">
+                {saving ? "Saving..." : donor ? "Save changes" : "Create profile"}
+              </button>
+              {donor && (
+                <button
+                  className="donor-profile-cancel-button"
+                  disabled={saving}
+                  onClick={handleCancelEdit}
+                  type="button"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        ) : (
+          <div className="donor-profile-summary">
+            <section className="donor-profile-summary-section">
+              <h3>Contact details</h3>
+              <dl className="donor-profile-details">
+                <div><dt>Full name</dt><dd>{account?.name || "Not provided"}</dd></div>
+                <div><dt>Email address</dt><dd>{account?.email || "Not provided"}</dd></div>
+                <div><dt>Phone number</dt><dd>{account?.phone || "Not provided"}</dd></div>
+                {account?.createdAt && (
+                  <div>
+                    <dt>Member since</dt>
+                    <dd>{new Date(account.createdAt).toLocaleDateString()}</dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+
+            <section className="donor-profile-summary-section">
+              <div className="donor-profile-summary-heading">
+                <h3>Donor details</h3>
+                <span className={`status-badge ${donor.availability ? "" : "unavailable"}`}>
+                  {donor.availability ? "Available to donate" : "Not available"}
+                </span>
+              </div>
+              <dl className="donor-profile-details">
+                <div><dt>Blood group</dt><dd>{donor.bloodGroup}</dd></div>
+                <div><dt>Availability</dt><dd>{donor.availability ? "Available" : "Not available"}</dd></div>
+                <div><dt>Area</dt><dd>{donor.location.area}</dd></div>
+                <div><dt>City</dt><dd>{donor.location.city}</dd></div>
+                <div>
+                  <dt>Last donation</dt>
+                  <dd>
+                    {donor.lastDonationDate
+                      ? new Date(donor.lastDonationDate).toLocaleDateString()
+                      : "Not provided"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Donor since</dt>
+                  <dd>{new Date(donor.createdAt).toLocaleDateString()}</dd>
+                </div>
+                <div>
+                  <dt>Profile updated</dt>
+                  <dd>{new Date(donor.updatedAt).toLocaleDateString()}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+        )}
+      </section>
+
+      <button
+        className="donor-profile-back"
+        onClick={() => navigate("/dashboard")}
+        type="button"
+      >
+        Back to dashboard
+      </button>
+    </main>
   );
 }
 

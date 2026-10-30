@@ -4,7 +4,7 @@ import User from "../models/User.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
     // Check required fields
     if (!name || !email || !password || !phone) {
@@ -31,7 +31,7 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       phone,
-      role: role || "SEEKER"
+      role: "USER"
     });
 
     res.status(201).json({
@@ -118,4 +118,3 @@ export const loginUser = async (req, res) => {
     });
   }
 };
-

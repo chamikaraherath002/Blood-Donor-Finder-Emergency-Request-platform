@@ -35,9 +35,9 @@ function Login({ darkMode, onToggleTheme }) {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("userName", data.user.name);
+      localStorage.setItem("userRole", data.user.role);
 
-      // was: onLogin() — now navigate to dashboard directly
-      navigate("/dashboard");
+      navigate(data.user.role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       setMessage("Cannot connect to the server");

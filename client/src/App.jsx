@@ -16,6 +16,7 @@ import MyBloodRequests from "./pages/MyBloodRequests.jsx";
 import ReceivedDonationRequests from "./pages/ReceivedDonationRequests.jsx";
 import SentDonationRequests from "./pages/SentDonationRequests.jsx";
 import Notifications from "./pages/Notifications.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 const navigationItems = [
   { to: "/dashboard", label: "Overview", icon: "⌂", end: true },
@@ -28,10 +29,15 @@ const navigationItems = [
   { to: "/donor-profile", label: "Donor profile", icon: "○" },
 ];
 
+const adminNavigationItems = [
+  { to: "/admin", label: "Admin dashboard", icon: "⌂", end: true },
+];
+
 function AppShell({ children, darkMode, onToggleTheme }) {
   const navigate = useNavigate();
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const token = localStorage.getItem("token");
+  const isAdmin = localStorage.getItem("userRole") === "ADMIN";
   const userName = localStorage.getItem("userName") || "";
   const nameParts = userName.trim().split(/\s+/).filter(Boolean);
   const initials = nameParts.length > 1
@@ -95,6 +101,7 @@ function AppShell({ children, darkMode, onToggleTheme }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -107,7 +114,7 @@ function AppShell({ children, darkMode, onToggleTheme }) {
         </NavLink>
         <p className="nav-caption">Workspace</p>
         <nav className="sidebar-nav" aria-label="Main navigation">
-          {navigationItems.map((item) => (
+          {(isAdmin ? adminNavigationItems : navigationItems).map((item) => (
             <NavLink
               end={item.end}
               aria-label={item.label}
@@ -186,8 +193,8 @@ function AppShell({ children, darkMode, onToggleTheme }) {
             <NavLink
               aria-label="View donor profile"
               className="profile-chip"
-              title="Donor profile"
-              to="/donor-profile"
+              title={isAdmin ? "Admin dashboard" : "Donor profile"}
+              to={isAdmin ? "/admin" : "/donor-profile"}
             >
               {initials}
             </NavLink>
@@ -207,6 +214,24 @@ function ProtectedRoute({ children, darkMode, onToggleTheme }) {
     </AppShell>
   ) : (
     <Navigate to="/login" replace />
+  );
+}
+
+function AdminRoute({ darkMode, onToggleTheme }) {
+  const token = localStorage.getItem("token");
+  const isAdmin = localStorage.getItem("userRole") === "ADMIN";
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <AppShell darkMode={darkMode} onToggleTheme={onToggleTheme}>
+      <AdminDashboard />
+    </AppShell>
   );
 }
 
@@ -236,9 +261,13 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
-            <Dashboard />
-          </ProtectedRoute>
+          localStorage.getItem("userRole") === "ADMIN" ? (
+            <Navigate to="/admin" replace />
+          ) : (
+            <ProtectedRoute darkMode={darkMode} onToggleTheme={toggleTheme}>
+              <Dashboard />
+            </ProtectedRoute>
+          )
         }
       />
       <Route
@@ -302,6 +331,10 @@ function App() {
             <Notifications />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/admin"
+        element={<AdminRoute darkMode={darkMode} onToggleTheme={toggleTheme} />}
       />
     </Routes>
   );

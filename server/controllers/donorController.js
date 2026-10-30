@@ -1,4 +1,5 @@
 import Donor from "../models/Donor.js";
+import User from "../models/User.js";
 import bloodCompatibility from "../utils/bloodCompatibility.js";
 
 export const createDonorProfile = async (req, res) => {
@@ -23,20 +24,36 @@ export const createDonorProfile = async (req, res) => {
       });
     }
 
-    // Create donor profile
-    const donor = await Donor.create({
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User account not found" });
+    }
+
+    const donor = new Donor({
       user: req.user.userId,
       bloodGroup,
       availability: availability ?? true,
       location,
       lastDonationDate: lastDonationDate || null,
     });
+    await donor.validate();
+
+    // Create donor profile
+    await donor.save();
+    await donor.populate("user", "name email phone role createdAt");
 
     res.status(201).json({
       message: "Donor profile created successfully",
       donor,
+      user: donor.user,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "Donor profile already exists" });
+    }
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
     console.error("Create donor error:", error);
 
     res.status(500).json({
@@ -48,22 +65,33 @@ export const createDonorProfile = async (req, res) => {
 // Get the logged-in user's donor profile
 export const getMyDonorProfile = async (req, res) => {
   try {
+    const user = await User.findById(req.user.userId)
+      .select("name email phone createdAt")
+      .lean();
+    if (!user) {
+      return res.status(404).json({
+        message: "User account not found"
+      });
+    }
+
     // Find donor profile using the logged-in user's ID
     const donor = await Donor.findOne({
       user: req.user.userId
-    }).populate("user", "name email phone role");
+    }).populate("user", "name email phone role createdAt");
 
     // If donor profile doesn't exist
     if (!donor) {
       return res.status(404).json({
-        message: "Donor profile not found"
+        message: "Donor profile not found",
+        user
       });
     }
 
     // Send donor profile to the client
     res.status(200).json({
       message: "Donor profile retrieved successfully",
-      donor
+      donor,
+      user
     });
   } catch (error) {
     console.error("Get donor profile error:", error);
@@ -82,7 +110,7 @@ export const updateMyDonorProfile = async (req, res) => {
       bloodGroup,
       availability,
       location,
-      lastDonationDate
+      lastDonationDate,
     } = req.body;
 
     // Find the donor profile of the logged-in user
@@ -114,15 +142,21 @@ export const updateMyDonorProfile = async (req, res) => {
       donor.lastDonationDate = lastDonationDate;
     }
 
+    await donor.validate();
     // Save the updated donor profile
     await donor.save();
+    await donor.populate("user", "name email phone role createdAt");
 
     // Send the updated profile back
     res.status(200).json({
       message: "Donor profile updated successfully",
-      donor
+      donor,
+      user: donor.user,
     });
   } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
     console.error("Update donor error:", error);
 
     res.status(500).json({
