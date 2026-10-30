@@ -2,36 +2,63 @@ import DonationRequest from "../models/DonationRequest.js";
 import Donor from "../models/Donor.js";
 import BloodRequest from "../models/BloodRequest.js";
 import Notification from "../models/Notification.js";
+import bloodCompatibility from "../utils/bloodCompatibility.js";
 
 // Send a donation request to a donor
 export const createDonationRequest = async (req, res) => {
   try {
-    const { donorId, bloodRequestId, message } = req.body;
+    const { donorId, bloodRequestId, message: requestMessage } = req.body;
 
-    // Check that required IDs were provided
-    if (!donorId || !bloodRequestId) {
+    if (!donorId) {
       return res.status(400).json({
-        message: "Please provide donor ID and blood request ID",
+        message: "Please provide a donor",
       });
     }
 
-    // Check that the blood request belongs to the logged-in user
-    const bloodRequest = await BloodRequest.findOne({
-      _id: bloodRequestId,
-      requester: req.user.userId,
-    });
+    let bloodRequest = null;
+    let bloodGroup = req.body.bloodGroup;
 
-    if (!bloodRequest) {
-      return res.status(404).json({
-        message: "Blood request not found",
+    if (bloodRequestId) {
+      bloodRequest = await BloodRequest.findOne({
+        _id: bloodRequestId,
+        requester: req.user.userId,
+      });
+
+      if (!bloodRequest) {
+        return res.status(404).json({
+          message: "Blood request not found",
+        });
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (
+        bloodRequest.status !== "PENDING" ||
+        bloodRequest.requiredDate < today
+      ) {
+        return res.status(400).json({
+          message:
+            "Donation requests can only be sent for active pending blood requests",
+        });
+      }
+
+      bloodGroup = bloodRequest.bloodGroup;
+    }
+
+    if (!bloodCompatibility[bloodGroup]) {
+      return res.status(400).json({
+        message: "Please provide a valid blood group",
       });
     }
 
-    // Only pending blood requests can receive donation requests
-    if (bloodRequest.status !== "PENDING") {
+    if (typeof requestMessage === "string" && requestMessage.length > 500) {
       return res.status(400).json({
-        message:
-          "Donation requests can only be sent for pending blood requests",
+        message: "The request message must be 500 characters or fewer",
+      });
+    }
+    if (requestMessage !== undefined && typeof requestMessage !== "string") {
+      return res.status(400).json({
+        message: "The request message must be text",
       });
     }
 
@@ -51,6 +78,12 @@ export const createDonationRequest = async (req, res) => {
       });
     }
 
+    if (!bloodCompatibility[bloodGroup].includes(donor.bloodGroup)) {
+      return res.status(400).json({
+        message: "This donor's blood group is not compatible with your request",
+      });
+    }
+
     // Prevent sending a request to yourself
     if (donor.user.toString() === req.user.userId.toString()) {
       return res.status(400).json({
@@ -58,37 +91,39 @@ export const createDonationRequest = async (req, res) => {
       });
     }
 
-    // Check whether a request already exists
+    // Avoid multiple active requests to the same donor.
     const existingRequest = await DonationRequest.findOne({
       requester: req.user.userId,
       donor: donor.user,
-      bloodRequest: bloodRequestId,
-      status: "PENDING",
+      status: { $in: ["PENDING", "ACCEPTED"] },
     });
 
     if (existingRequest) {
       return res.status(409).json({
-        message: "A donation request has already been sent to this donor",
+        message: "An active donation request already exists for this donor",
       });
     }
 
-    // Create the donation request
     const donationRequest = await DonationRequest.create({
       requester: req.user.userId,
       donor: donor.user,
-      bloodRequest: bloodRequestId,
-      message: message || "",
+      bloodRequest: bloodRequest?._id || null,
+      bloodGroup,
+      message: requestMessage?.trim() || "",
     });
-    console.log("Creating notification for donor:", donor.user);
-    // Create a notification for the donor
-    await Notification.create({
-      recipient: donor.user,
-      title: "New Donation Request",
-      message: "You received a new blood donation request.",
-      type: "DONATION_REQUEST",
-      donationRequest: donationRequest._id,
-      bloodRequest: bloodRequest._id,
-    });
+    try {
+      await Notification.create({
+        recipient: donor.user,
+        title: "New Donation Request",
+        message: `A user is requesting a ${bloodGroup} blood donation.${requestMessage?.trim() ? ` ${requestMessage.trim()}` : ""}`,
+        type: "DONATION_REQUEST",
+        donationRequest: donationRequest._id,
+        bloodRequest: bloodRequest?._id || null,
+      });
+    } catch (error) {
+      await DonationRequest.findByIdAndDelete(donationRequest._id);
+      throw error;
+    }
 
     // Return the created request
     res.status(201).json({
@@ -111,7 +146,10 @@ export const getMyReceivedDonationRequests = async (req, res) => {
     const donationRequests = await DonationRequest.find({
       donor: req.user.userId,
     })
-      .populate("requester", "name email phone")
+      .populate({
+        path: "requester",
+        select: "name email phone",
+      })
       .populate(
         "bloodRequest",
         "bloodGroup units hospital location urgency requiredDate status",
@@ -154,6 +192,32 @@ export const getMySentDonationRequests = async (req, res) => {
 
     res.status(500).json({
       message: "Failed to retrieve sent donation requests",
+    });
+  }
+};
+
+// Delete a donation request sent by the logged-in user.
+export const deleteMySentDonationRequest = async (req, res) => {
+  try {
+    const donationRequest = await DonationRequest.findOneAndDelete({
+      _id: req.params.id,
+      requester: req.user.userId,
+    });
+
+    if (!donationRequest) {
+      return res.status(404).json({
+        message: "Sent donation request not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Sent donation request deleted successfully",
+      donationRequest,
+    });
+  } catch (error) {
+    console.error("Delete sent donation request error:", error);
+    res.status(500).json({
+      message: "Failed to delete sent donation request",
     });
   }
 };

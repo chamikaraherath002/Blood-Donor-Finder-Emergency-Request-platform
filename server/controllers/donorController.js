@@ -158,6 +158,9 @@ export const searchDonors = async (req, res) => {
       // Only return donors who are currently available
       availability: true,
 
+      // A user should never appear as their own donor.
+      user: { $ne: req.user.userId },
+
       // Find donors whose blood group can match the requested group
       bloodGroup: {
         $in: compatibleGroups

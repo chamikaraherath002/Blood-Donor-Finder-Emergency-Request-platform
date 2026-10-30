@@ -16,11 +16,27 @@ const donationRequestSchema = new mongoose.Schema(
       required: true
     },
 
-    // The blood request connected to this donation request
+    // Optional link for requests created from a saved blood request.
     bloodRequest: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BloodRequest",
-      required: true
+      default: null
+    },
+
+    // Blood group needed when the request is sent directly to a donor.
+    bloodGroup: {
+      type: String,
+      enum: [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-",
+        "O+",
+        "O-"
+      ],
+      default: null
     },
 
     // Current status of the donation request
