@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
   useNavigate,
 } from "react-router-dom";
 import Login from "./pages/Login.jsx";
@@ -31,7 +30,6 @@ const navigationItems = [
 
 function AppShell({ children, darkMode, onToggleTheme }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const token = localStorage.getItem("token");
   const userName = localStorage.getItem("userName") || "";
@@ -39,12 +37,6 @@ function AppShell({ children, darkMode, onToggleTheme }) {
   const initials = nameParts.length > 1
     ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase()
     : nameParts[0]?.[0]?.toUpperCase() || "?";
-  const currentItem = navigationItems.find((item) =>
-    item.end
-      ? location.pathname === item.to
-      : location.pathname.startsWith(item.to),
-  );
-
   useEffect(() => {
     // Keep the unread badge fresh without requiring a page reload.
     let active = true;
@@ -98,7 +90,7 @@ function AppShell({ children, darkMode, onToggleTheme }) {
         fetchUnreadNotificationCount,
       );
     };
-  }, [location.pathname, token]);
+  }, [token]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -137,7 +129,6 @@ function AppShell({ children, darkMode, onToggleTheme }) {
       </aside>
       <div className="app-main">
         <header className="topbar">
-          <span className="topbar-label">{currentItem?.label || "Workspace"}</span>
           <div className="topbar-tools">
             <button
               aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}

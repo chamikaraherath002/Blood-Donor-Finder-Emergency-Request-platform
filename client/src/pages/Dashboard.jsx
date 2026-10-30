@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bloodDonationImage from "../assets/blood-donation.png";
 
 const dashboardCards = [
   {
@@ -167,24 +168,41 @@ function Dashboard() {
     <div className="dashboard-page">
       <section className="dashboard-heading">
         <h1>Good to see you</h1>
-        <p>Your community can make a life-changing difference, one donation at a time.</p>
+        <p>
+          Connecting blood donors with those who need them most.
+        </p>
       </section>
 
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
           <p className="eyebrow">Every drop counts</p>
           <h2>Be there when someone needs you.</h2>
-          <p>
-            Connect people who need blood with generous donors in their community.
+          <p className="dashboard-hero-tagline">
+            Your kindness can give someone another tomorrow.
           </p>
+          <div className="dashboard-hero-actions">
+            <button
+              className="hero-find-donor"
+              onClick={() => navigate("/find-donors")}
+              type="button"
+            >
+              Find a donor
+            </button>
+            <button
+              className="hero-create-request"
+              onClick={() => navigate("/create-blood-request")}
+              type="button"
+            >
+              Create blood request
+            </button>
+          </div>
         </div>
-        <button
-          className="button-primary"
-          onClick={() => navigate("/find-donors")}
-          type="button"
-        >
-          Find a donor
-        </button>
+        <img
+          alt=""
+          aria-hidden="true"
+          className="dashboard-hero-art"
+          src={bloodDonationImage}
+        />
       </section>
 
       <div className="dashboard-section-heading urgent-request-heading">

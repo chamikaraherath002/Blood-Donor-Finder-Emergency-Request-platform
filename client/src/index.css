@@ -5,22 +5,23 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --background: #f7f8fb;
-  --surface: #ffffff;
-  --sidebar-background: #f0c0c5;
-  --surface-alt: #f1f3f7;
-  --heading: #1d2029;
-  --muted: #000000;
-  --border: #e5e8ee;
+  --background: #fbf8f9;
+  --surface: #d7d4d4;
+  --sidebar-background: #f5e5e8;
+  --sidebar-text: #4a3037;
+  --surface-alt: #f8eff1;
+  --heading: #2b2025;
+  --muted: #766b71;
+  --border: #ebdfe2;
   --primary: #c52f49;
   --primary-hover: #a9233a;
   --primary-soft: #fff0f2;
   --primary-glow: rgba(197, 47, 73, 0.14);
-  --primary-border: rgba(197, 47, 73, 0.42);
-  --radius-lg: 18px;
-  --radius-md: 14px;
-  --shadow-sm: 0 4px 16px rgba(28, 35, 52, 0.045);
-  --shadow-md: 0 12px 30px rgba(28, 35, 52, 0.09);
+  --primary-border: rgba(197, 47, 73, 0.3);
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --shadow-sm: 0 5px 18px rgba(28, 35, 52, 0.055);
+  --shadow-md: 0 14px 36px rgba(28, 35, 52, 0.1);
 }
 
 :root[data-theme="dark"] {
@@ -28,6 +29,7 @@
   --background: #12141a;
   --surface: #1b1e27;
   --sidebar-background: #1b1e27;
+  --sidebar-text: #e2dce0;
   --surface-alt: #252936;
   --heading: #f4f5f8;
   --muted: #a2a8b7;
@@ -56,7 +58,7 @@ body {
   color: var(--heading);
   background: var(--background);
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.6;
   transition: color 180ms ease, background-color 180ms ease;
 }
 
@@ -85,6 +87,12 @@ h2,
 h3,
 p {
   margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
 }
 
 ::selection {

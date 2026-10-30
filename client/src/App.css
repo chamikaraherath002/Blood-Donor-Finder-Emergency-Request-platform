@@ -1,7 +1,11 @@
+/* Main workspace layout and sidebar navigation. */
 .app-shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 258px minmax(0, 1fr);
+  background:
+    radial-gradient(ellipse at 84% 8%, rgba(197, 47, 73, 0.035), transparent 30%),
+    var(--background);
 }
 
 .sidebar {
@@ -13,6 +17,8 @@
   padding: 28px 18px 20px;
   border-right: 1px solid var(--border);
   background: var(--sidebar-background);
+
+  box-shadow: 4px 0 24px rgba(68, 34, 45, 0.045);
 }
 
 .brand {
@@ -32,15 +38,16 @@
   height: 38px;
   display: grid;
   place-items: center;
-  border-radius: 13px;
+  border-radius: 14px;
   color: #fff;
-  background: var(--primary);
+  background: linear-gradient(145deg, var(--primary), #e05b6e);
   font-size: 1.1rem;
+  box-shadow: 0 6px 14px var(--primary-glow);
 }
 
 .nav-caption {
   margin: 0 12px 10px;
-  color: var(--muted);
+  color: var(--sidebar-text);
   font-size: 0.68rem;
   font-weight: 750;
   letter-spacing: 0.13em;
@@ -59,8 +66,8 @@
   gap: 12px;
   padding: 11px 12px;
   border: 0;
-  border-radius: 10px;
-  color: var(--muted);
+  border-radius: 12px;
+  color: var(--sidebar-text);
   background: transparent;
   font: inherit;
   font-size: 0.88rem;
@@ -78,8 +85,10 @@
 }
 
 .sidebar-nav a.active {
+  /* The inset stripe keeps the active page visible in both themes. */
   color: var(--primary);
-  background: var(--primary-soft);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .nav-icon {
@@ -99,24 +108,26 @@
   min-width: 0;
 }
 
+/* Sticky header tools and notification badge. */
 .topbar {
+  /* Keep the page title and account actions visible while scrolling. */
+  position: sticky;
+  z-index: 5;
+  top: 0;
   min-height: 76px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 20px;
   padding: 0 clamp(20px, 4vw, 56px);
   border-bottom: 1px solid var(--border);
-  background: var(--background);
-}
-
-.topbar-label {
-  color: var(--muted);
-  font-size: 0.82rem;
+  background: color-mix(in srgb, var(--background) 90%, transparent);
+  backdrop-filter: blur(14px);
 }
 
 .topbar-tools {
   display: flex;
+  margin-left: auto;
   align-items: center;
   gap: 12px;
 }
@@ -144,6 +155,7 @@
 }
 
 .topbar-notifications {
+  /* Anchor the unread badge to the notification link. */
   position: relative;
   width: 42px;
   height: 42px;
@@ -171,6 +183,7 @@
 }
 
 .notification-count {
+  /* The badge sits outside the bell without changing its button size. */
   position: absolute;
   top: -5px;
   right: -6px;
@@ -181,7 +194,7 @@
   padding: 0 5px;
   border: 2px solid var(--background);
   border-radius: 999px;
-  color: #fff;
+  color: #f5f5f5;
   background: var(--primary);
   font-size: 0.62rem;
   font-weight: 750;
@@ -219,14 +232,15 @@
   cursor: pointer;
 }
 
+/* Shared page typography, forms, fields, and buttons. */
 .page-content {
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 38px clamp(20px, 4vw, 56px) 56px;
+  padding: 42px clamp(20px, 4vw, 56px) 64px;
 }
 
 .page-content h1 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: clamp(1.8rem, 3vw, 2.45rem);
   letter-spacing: -0.055em;
 }
@@ -253,17 +267,18 @@
 }
 
 .page-content hr {
-  margin: 24px 0;
+  margin: 28px 0;
   border: 0;
   border-top: 1px solid var(--border);
 }
 
 .page-content form {
+  /* Shared two-column form panel used across authenticated pages. */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin: 24px 0;
-  padding: 24px;
+  gap: 20px;
+  margin: 26px 0;
+  padding: clamp(20px, 3vw, 30px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -273,24 +288,25 @@
 .page-content form > div {
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 8px;
 }
 
 .page-content label {
   color: var(--heading);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 650;
 }
 
 .page-content input:not([type="checkbox"]),
 .page-content select,
 .page-content textarea {
+  /* Keep form controls visually consistent, including their focus state. */
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 11px;
   outline: none;
   color: var(--heading);
   background: var(--background);
@@ -300,7 +316,7 @@
 }
 
 .page-content textarea {
-  min-height: 104px;
+  min-height: 120px;
   resize: vertical;
 }
 
@@ -317,10 +333,11 @@
 
 .page-content button,
 .button-primary {
-  min-height: 42px;
-  padding: 9px 15px;
+  /* Default to secondary buttons; submit and primary actions are promoted below. */
+  min-height: 44px;
+  padding: 10px 17px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 11px;
   color: var(--heading);
   background: var(--surface);
   font: inherit;
@@ -346,10 +363,12 @@
 .button-primary {
   border-color: var(--primary);
   color: #fff;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), #d9445b);
+  box-shadow: 0 5px 14px var(--primary-glow);
 }
 
 .page-content form > button[type="submit"] {
+  /* Place the form's main action below all fields. */
   grid-column: 1 / -1;
   justify-self: start;
   min-width: 180px;
@@ -357,9 +376,11 @@
 
 .page-content button[type="submit"]:hover,
 .button-primary:hover {
-  background: var(--primary-hover);
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+  box-shadow: 0 8px 18px var(--primary-glow);
 }
 
+/* Dashboard hero, request cards, and quick navigation cards. */
 .dashboard-page .dashboard-heading {
   margin-bottom: 26px;
 }
@@ -369,21 +390,24 @@
 }
 
 .dashboard-hero {
+  /* High-contrast introduction area for the main dashboard action. */
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
   margin-bottom: 26px;
+  min-height: 260px;
   padding: clamp(24px, 4vw, 40px);
   border-radius: var(--radius-lg);
   color: #fff;
-  background: linear-gradient(115deg, #a91f39 0%, #d83b50 58%, #ee766f 100%);
+  background: linear-gradient(115deg, #a91f39 0%, #c52f49 58%, #e87578 100%);
   box-shadow: 0 18px 40px rgba(175, 35, 60, 0.18);
 }
 
 .dashboard-hero::after {
+  /* Decorative rings add depth without covering the hero content. */
   position: absolute;
   right: 8%;
   top: -90px;
@@ -398,7 +422,20 @@
 .dashboard-hero-copy {
   position: relative;
   z-index: 1;
-  max-width: 590px;
+  max-width: 62%;
+}
+
+.dashboard-hero-art {
+  position: absolute;
+  top: 50%;
+  right: 15%;
+  width: clamp(120px, 15vw, 190px);
+  max-height: 78%;
+  object-fit: contain;
+  opacity: 0.48;
+  filter: brightness(0) invert(1);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .dashboard-hero .eyebrow {
@@ -422,16 +459,126 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+.dashboard-hero .dashboard-hero-tagline {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.dashboard-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  gap: 10px;
+}
+
+.my-blood-requests-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.my-blood-request-card {
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-blood-request-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.my-blood-request-heading h2 {
+  margin: 0;
+}
+
+.my-blood-request-group {
+  flex: 0 0 auto;
+  padding: 5px 11px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.my-blood-request-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
+.my-blood-request-details p {
+  margin-bottom: 8px;
+}
+
+.my-blood-request-actions,
+.my-blood-request-page-actions,
+.blood-request-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-blood-request-actions {
+  margin-top: 14px;
+}
+
+.my-blood-request-actions .blood-request-cancel-button {
+  border-color: var(--primary-border);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.my-blood-request-actions .blood-request-cancel-button:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.blood-request-edit-form .blood-request-edit-message,
+.blood-request-edit-form .blood-request-edit-actions {
+  grid-column: 1 / -1;
+}
+
+.blood-request-edit-form .blood-request-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-blood-request-page-actions {
+  margin-top: 24px;
+}
+
 .dashboard-hero button {
   position: relative;
-  z-index: 1;
-  flex-shrink: 0;
+  padding-inline: 22px;
   border-color: #fff;
+  border-radius: 12px;
+  color: var(--primary);
+  background: #ffefef;
+  box-shadow: 0 8px 22px rgba(19, 7, 10, 0.16);
+}
+
+.dashboard-hero .hero-find-donor:hover,
+.dashboard-hero .hero-create-request:hover {
+  transform: translateY(-2px);
+  border-color: #f6f2f2;
   color: var(--primary);
   background: #fff;
+  box-shadow: 0 11px 26px rgba(83, 16, 34, 0.23);
 }
 
 .dashboard-section-heading {
+  /* Separate dashboard content sections with a consistent heading row. */
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -451,6 +598,7 @@
 }
 
 .urgent-request-heading > div {
+  /* Keep the section title and supporting text aligned on wide screens. */
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -469,22 +617,24 @@
 }
 
 .urgent-request-card {
+  /* Clickable summary cards open the full request details dialog. */
   min-width: 0;
   overflow: hidden;
   cursor: pointer;
-  padding: 18px;
-  border: 1px solid var(--primary-border);
+  padding: 20px;
+  border: 1px solid var(--border);
   border-top: 4px solid var(--primary);
   border-radius: var(--radius-md);
   background:
     linear-gradient(145deg, var(--primary-soft), transparent 48%),
     var(--surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .urgent-request-card:hover,
 .urgent-request-card:focus-visible {
+  /* Provide the same clear affordance for pointer and keyboard users. */
   transform: translateY(-2px);
   border-color: var(--primary-border);
   box-shadow: var(--shadow-md);
@@ -507,7 +657,9 @@
   font-weight: 700;
 }
 
+/* Blood request details dialog. */
 .request-modal-backdrop {
+  /* Dim the workspace while keeping the request dialog centered. */
   position: fixed;
   z-index: 20;
   inset: 0;
@@ -561,6 +713,7 @@
 }
 
 .request-detail-list {
+  /* Present request metadata in a compact, scan-friendly grid. */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
@@ -636,6 +789,7 @@
 
 .urgency-badge,
 .request-blood-group {
+  /* Shared pill shape; each urgency level gets its own color below. */
   display: inline-flex;
   align-items: center;
   padding: 5px 9px;
@@ -665,6 +819,7 @@
 }
 
 .urgent-request-card .request-blood-group {
+  /* Make the needed blood type the most prominent card detail. */
   min-width: 76px;
   justify-content: center;
   padding: 9px 16px;
@@ -695,6 +850,7 @@
 }
 
 .request-units {
+  /* Visually group quantity and required date beneath the location. */
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -715,17 +871,19 @@
 }
 
 .dashboard-grid {
+  /* Arrange dashboard shortcuts evenly and collapse to one column on mobile. */
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
 .dashboard-card {
-  min-height: 155px;
+  /* Make each dashboard shortcut read as a single clickable tile. */
+  min-height: 168px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 19px;
+  padding: 21px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -764,14 +922,209 @@
   font-weight: 450;
 }
 
-.record-card {
-  margin: 14px 0;
+/* Search results show donor identity, blood type, and contact options together. */
+.donor-results {
+  margin-top: 30px;
+}
+
+.donor-results-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.donor-results-heading h2 {
+  margin-bottom: 5px;
+}
+
+.donor-results-heading p {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.donor-results-count {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border-radius: 999px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.donor-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.donor-result-card {
+  min-width: 0;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.donor-result-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-md);
+}
+
+.donor-result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.donor-avatar {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.donor-result-identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.donor-result-identity h3 {
+  overflow: hidden;
+  margin: 0 0 3px;
+  font-size: 0.96rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.donor-result-identity p {
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.donor-blood-type {
+  min-width: 52px;
+  padding: 7px 9px;
+  border: 1px solid var(--primary-border);
+  border-radius: 11px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.donor-availability {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 14px;
+  color: #18764d;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.donor-availability > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #23a36d;
+  box-shadow: 0 0 0 3px rgba(35, 163, 109, 0.12);
+}
+
+.donor-contact {
+  display: grid;
+  gap: 8px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+
+.donor-contact a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--heading);
+  font-size: 0.82rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.donor-contact a:hover {
+  color: var(--primary);
+}
+
+.donor-contact a span {
+  color: var(--primary);
+}
+
+.donor-last-donation {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.donor-empty-state {
+  padding: 34px 20px;
+  border: 1px dashed var(--primary-border);
+  border-radius: var(--radius-md);
+  background: var(--primary-soft);
+  text-align: center;
+}
+
+.donor-empty-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--surface);
+  font-size: 1.1rem;
+}
+
+.donor-empty-state h3 {
+  margin: 0 0 5px;
+}
+
+.donor-empty-state p {
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+/* Shared cards used for profile and request records. */
+.record-card {
+  margin: 16px 0;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(145deg, rgba(197, 47, 73, 0.025), transparent 45%),
+    var(--surface);
+  box-shadow: var(--shadow-sm);
   text-align: left;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.record-card:hover {
+  /* Gently highlight record cards without implying they are clickable. */
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-md);
 }
 
 .record-card p {
@@ -779,6 +1132,7 @@
 }
 
 .status-badge {
+  /* Reusable pill for request and profile status labels. */
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
@@ -789,6 +1143,17 @@
   font-weight: 700;
 }
 
+.page-content > div > button + br {
+  /* Hide legacy line breaks so adjacent page actions align consistently. */
+  display: none;
+}
+
+.page-content > div > button + br + button {
+  /* Add breathing room between the legacy page action buttons. */
+  margin-left: 10px;
+}
+
+/* Login and registration split-screen layout. */
 .auth-page {
   position: relative;
   min-height: 100vh;
@@ -807,10 +1172,11 @@
   color: #fff;
   background:
     radial-gradient(circle at 78% 26%, rgba(255, 255, 255, 0.14), transparent 26%),
-    linear-gradient(145deg, #a91f39, #d83b50 62%, #ee766f);
+    linear-gradient(145deg, #a91f39, #c52f49 62%, #e87578);
 }
 
 .auth-heartbeat {
+  /* Keep the background illustration decorative and behind readable content. */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -852,13 +1218,20 @@
 }
 
 .auth-form-side {
+  /* Center the form card alongside the welcome panel. */
   display: grid;
   place-items: center;
-  padding: 32px;
+  padding: clamp(28px, 5vw, 64px);
 }
 
 .auth-card {
+  /* Separate the sign-in form from the colored welcome panel. */
   width: min(420px, 100%);
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
 }
 
 .auth-tools {
@@ -900,6 +1273,7 @@
 }
 
 .auth-card form {
+  /* Keep authentication fields in a clear, single-column sequence. */
   display: grid;
   gap: 16px;
 }
@@ -922,17 +1296,18 @@
   box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 11px;
   color: var(--heading);
   background: var(--surface);
   font: inherit;
 }
 
 .auth-card form button {
+  /* Use a full-width primary action on sign-in and registration forms. */
   min-height: 46px;
   margin-top: 4px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 11px;
   color: white;
   background: var(--primary);
   font: inherit;
@@ -973,7 +1348,9 @@
   font-size: 0.88rem;
 }
 
+/* Compact sidebar and single-column layouts on smaller screens. */
 @media (max-width: 980px) {
+  /* Replace the full sidebar with a compact icon rail on tablet widths. */
   .app-shell {
     grid-template-columns: 78px minmax(0, 1fr);
   }
@@ -1007,15 +1384,22 @@
   .sidebar-bottom {
     width: 100%;
   }
+
+  .dashboard-hero-art {
+    right: 18%;
+    opacity: 0.3;
+  }
 }
 
 @media (max-width: 700px) {
+  /* Use bottom navigation and stacked content on phone-sized screens. */
   .app-shell {
     display: block;
     padding-bottom: 70px;
   }
 
   .sidebar {
+    /* Keep the navigation reachable at the bottom of short mobile screens. */
     position: fixed;
     z-index: 10;
     inset: auto 0 0;
@@ -1063,8 +1447,8 @@
     padding: 0 18px;
   }
 
-  .topbar-label {
-    font-size: 0.74rem;
+  .topbar-tools {
+    gap: 8px;
   }
 
   .theme-toggle {
@@ -1072,6 +1456,11 @@
     height: 38px;
     min-height: 38px;
     font-size: 1.1rem;
+  }
+
+  .topbar-notifications {
+    width: 38px;
+    height: 38px;
   }
 
   .topbar-signout {
@@ -1087,10 +1476,28 @@
     padding: 28px 18px 40px;
   }
 
+  .page-content form {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .page-content > div > button + br + button {
+    margin: 8px 0 0;
+  }
+
   .page-content form,
   .dashboard-grid,
-  .urgent-request-grid {
+  .urgent-request-grid,
+  .donor-results-grid,
+  .my-blood-request-details {
+    /* Stack forms and cards to fit narrow screens without horizontal scroll. */
     grid-template-columns: 1fr;
+  }
+
+  .donor-results-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .urgent-request-heading > div {
@@ -1102,6 +1509,19 @@
   .dashboard-hero {
     align-items: flex-start;
     flex-direction: column;
+    min-height: 0;
+  }
+
+  .dashboard-hero-copy {
+    max-width: 100%;
+  }
+
+  .dashboard-hero-art {
+    display: none;
+  }
+
+  .dashboard-hero-actions {
+    align-self: flex-start;
   }
 
   .auth-page {
@@ -1127,5 +1547,10 @@
 
   .auth-form-side {
     padding: 32px 22px 46px;
+  }
+
+  .auth-card {
+    padding: 24px 20px;
+    box-shadow: var(--shadow-sm);
   }
 }
